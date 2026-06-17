@@ -1,0 +1,40 @@
+# ===== Security Headers =====
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always unset X-Powered-By
+</IfModule>
+
+# inc/ klas??r??ne taray??c??dan do??rudan eri??imi engelle
+RewriteEngine On
+RewriteRule ^inc/ - [F,L]
+RewriteRule ^admin/inc/ - [F,L]
+
+# .sql ve config dosyalar??na eri??imi engelle
+<FilesMatch "\.(sql|env|log|ini)$">
+  Require all denied
+</FilesMatch>
+
+RewriteEngine On
+
+# E??er site bir alt klas??rdeyse RewriteBase ayarla (canl??da k??k ise / olur)
+RewriteBase /medikal-php/
+
+# admin/ alt dizini dokunmadan ge??sin ??? admin'de .php URL'leri ham ??al??????r
+RewriteRule ^admin/ - [L]
+
+# .php uzant??l?? URL geldi ise uzant??s??z s??r??me y??nlendir (SEO i??in)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/(.+)\.php[\s?] [NC]
+RewriteRule ^ /%1 [R=302,L,QSA]
+
+# Uzant??s??z URL geldi ise ger??ek .php dosyas??na ba??la (kullan??c?? g??rmez)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L]
+
+# index.php trailing slash
+DirectoryIndex index.php index.html
+
